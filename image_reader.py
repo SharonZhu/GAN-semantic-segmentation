@@ -161,6 +161,7 @@ class ImageReader(object):
         self.coord = coord
         
         self.image_list, self.label_list = read_labeled_image_list(self.data_dir, self.data_list)
+        print(self.image_list[0], self.label_list[0])
         self.images = tf.convert_to_tensor(self.image_list, dtype=tf.string)
         self.labels = tf.convert_to_tensor(self.label_list, dtype=tf.string)
         self.queue = tf.train.slice_input_producer([self.images, self.labels],
@@ -178,3 +179,6 @@ class ImageReader(object):
         image_batch, label_batch = tf.train.batch([self.image, self.label],
                                                   num_elements)
         return image_batch, label_batch
+
+
+

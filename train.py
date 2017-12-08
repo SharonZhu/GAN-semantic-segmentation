@@ -23,8 +23,8 @@ from image_reader import ImageReader
 IMG_MEAN = np.array((104.00698793,116.66876762,122.67891434), dtype=np.float32)
 
 BATCH_SIZE = 10
-DATA_DIRECTORY = './data/'
-DATA_LIST_PATH = './data/dataset/train_city.txt'
+DATA_DIRECTORY = 'data/'
+DATA_LIST_PATH = 'data/dataset/train_city.txt'
 IGNORE_LABEL = 255
 INPUT_SIZE = '512,512'
 LEARNING_RATE = 2.5e-4
@@ -185,13 +185,13 @@ def main():
     pred = tf.expand_dims(raw_output_up, dim=3)
     
     # Image summary.
-    images_summary = tf.py_func(inv_preprocess, [image_batch, args.save_num_images, IMG_MEAN], tf.uint8)
-    labels_summary = tf.py_func(decode_labels, [label_batch, args.save_num_images, args.num_classes], tf.uint8)
-    preds_summary = tf.py_func(decode_labels, [pred, args.save_num_images, args.num_classes], tf.uint8)
+    # images_summary = tf.py_func(inv_preprocess, [image_batch, args.save_num_images, IMG_MEAN], tf.uint8)
+    # labels_summary = tf.py_func(decode_labels, [label_batch, args.save_num_images, args.num_classes], tf.uint8)
+    # preds_summary = tf.py_func(decode_labels, [pred, args.save_num_images, args.num_classes], tf.uint8)
     
-    total_summary = tf.summary.image('images', 
-                                     tf.concat(axis=2, values=[images_summary, labels_summary, preds_summary]), 
-                                     max_outputs=args.save_num_images) # Concatenate row-wise.
+    # total_summary = tf.summary.image('images',
+    #                                  tf.concat(axis=2, values=[images_summary, labels_summary, preds_summary]),
+    #                                  max_outputs=args.save_num_images) # Concatenate row-wise.
     summary_writer = tf.summary.FileWriter(args.snapshot_dir,
                                            graph=tf.get_default_graph())
    
@@ -220,9 +220,9 @@ def main():
     config = tf.ConfigProto()
     config.gpu_options.allow_growth = True
     sess = tf.Session(config=config)
-    init = tf.global_variables_initializer()
-    
-    sess.run(init)
+
+    sess.run(tf.local_variables_initializer())
+    sess.run(tf.global_variables_initializer())
     
     # Saver for storing checkpoints of the model.
     saver = tf.train.Saver(var_list=tf.global_variables(), max_to_keep=10)
@@ -233,6 +233,7 @@ def main():
         load(loader, sess, args.restore_from)
     
     # Start queue threads.
+
     threads = tf.train.start_queue_runners(coord=coord, sess=sess)
 
     # Iterate over training steps.
@@ -241,11 +242,12 @@ def main():
         feed_dict = { step_ph : step }
         
         if step % args.save_pred_every == 0:
-            loss_value, images, labels, preds, summary, _ = sess.run([reduced_loss, image_batch, label_batch,
-                                                                      pred, total_summary, train_op],
+            # loss_value, images, labels, preds, summary, _ = sess.run([reduced_loss, image_batch, label_batch,
+            #                                                           pred, total_summary, train_op],
+            #                                                          feed_dict=feed_dict)
+            loss_value, images, labels, preds, _ = sess.run([reduced_loss, image_batch, label_batch,
+                                                                      pred, train_op],
                                                                      feed_dict=feed_dict)
-            print(images)
-            sys.exit()
             summary_writer.add_summary(summary, step)
             save(saver, sess, args.snapshot_dir, step)
         else:

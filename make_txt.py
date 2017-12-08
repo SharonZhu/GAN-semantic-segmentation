@@ -8,7 +8,7 @@
 import os
 import sys
 import glob
-DATA_DIR = './data/leftImg8bit/val/'
+DATA_DIR = './data/leftImg8bit/test/'
 
 def write_line(file, image_dir, segmentation_dir):
     file.write(image_dir + ' ')
@@ -27,7 +27,7 @@ def making_txt(set, data_path, names):
         for f in files:
             print(f)
             img_dir = f.split('data/')[1]
-            seg_dir = 'gtFile' + img_dir.split('leftImg8bit')[1] + 'gtFine_labelIds.png'
+            seg_dir = 'gtFine' + img_dir.split('leftImg8bit')[1] + 'gtFine_labelIds.png'
             print(img_dir)
             print(seg_dir)
             write_line(txt_file, img_dir, seg_dir)
@@ -40,4 +40,4 @@ if __name__ == '__main__':
              'stuttgart', 'tubingen', 'ulm', 'weimar', 'zurich']
     names_val = ['frankfurt', 'lindau', 'munster']
     names_test = ['berlin', 'bielefeld', 'bonn', 'leverkusen', 'mainz', 'munich']
-    making_txt('val', DATA_DIR, names_val)
+    making_txt('test', DATA_DIR, names_test)
