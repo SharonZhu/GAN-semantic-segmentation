@@ -2,7 +2,8 @@ from PIL import Image
 import numpy as np
 import tensorflow as tf
 
-# colour map
+# colour map for VOC
+'''
 label_colours = [(0,0,0)
                 # 0=background
                 ,(128,0,0),(0,128,0),(128,128,0),(0,0,128),(128,0,128)
@@ -13,6 +14,18 @@ label_colours = [(0,0,0)
                 # 11=diningtable, 12=dog, 13=horse, 14=motorbike, 15=person
                 ,(0,64,0),(128,64,0),(0,192,0),(128,192,0),(0,64,128)]
                 # 16=potted plant, 17=sheep, 18=sofa, 19=train, 20=tv/monitor
+'''
+# color map for CityScapes
+label_colours = [(0,0,0)
+                # 19=ignore
+                ,(128,0,0),(0,128,0),(128,128,0),(0,0,128),(128,0,128)
+                # 1=sidewalk, 2=building, 3=wall, 4=fence, 5=pole
+                ,(0,128,128),(128,128,128),(64,0,0),(192,0,0),(64,128,0)
+                # 6=traffic light, 7=traffic sign, 8=vegetation, 9=terrain, 10=sky
+                ,(192,128,0),(64,0,128),(192,0,128),(64,128,128),(192,128,128)
+                # 11=person, 12=rider, 13=car, 14=truck, 15=bus
+                ,(0,64,0),(128,64,0),(0,192,0),(128,192,0)]
+                # 16=train, 17=motorcycle, 18=bicycle, 0=road
 
 def decode_labels(mask, num_images=1, num_classes=21):
     """Decode batch of segmentation masks.

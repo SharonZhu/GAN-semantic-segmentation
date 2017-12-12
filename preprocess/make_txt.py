@@ -17,8 +17,6 @@ def write_line(file, image_dir, segmentation_dir):
 
 def making_txt(set, data_path, names):
     txt_file = open('./data/dataset/' + set + '_city.txt', 'w')
-    path = os.path.join(data_path, '*g')
-    files = glob.glob(path)
 
     for name in names:
         path = os.path.join(data_path, name, '*g')
@@ -27,7 +25,7 @@ def making_txt(set, data_path, names):
         for f in files:
             print(f)
             img_dir = f.split('data/')[1]
-            seg_dir = 'gtFine' + img_dir.split('leftImg8bit')[1] + 'gtFine_labelIds.png'
+            seg_dir = 'gtFine' + img_dir.split('leftImg8bit')[1] + 'gtFine_labelTrainIds.png'
             print(img_dir)
             print(seg_dir)
             write_line(txt_file, img_dir, seg_dir)
