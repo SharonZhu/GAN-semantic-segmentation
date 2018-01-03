@@ -156,9 +156,3 @@ class DeepLabV3_101(Network):
         raw_output = tf.argmax(raw_output, dimension=3)
         prediction = tf.expand_dims(raw_output, dim=3)
         return prediction
-
-# test
-image = tf.placeholder(dtype=tf.float32, shape=[10, 512, 512, 3])
-net = DeepLabV3_101(image, is_training=True, num_classes=20)
-print(net)
-sys.exit()

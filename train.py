@@ -16,7 +16,7 @@ import time
 import tensorflow as tf
 import numpy as np
 
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 
 from models.deeplab_v3_s16_res50 import DeepLabV3_50
 from utils import decode_labels, inv_preprocess, prepare_label
@@ -35,7 +35,7 @@ NUM_CLASSES = 20
 NUM_STEPS = 20001
 POWER = 0.9
 RANDOM_SEED = 1234
-RESTORE_FROM = None
+RESTORE_FROM = './data/snapshots/'
 SAVE_NUM_IMAGES = 2
 SAVE_PRED_EVERY = 1000
 SNAPSHOT_DIR = './data/snapshots/'
@@ -115,9 +115,17 @@ def load(saver, sess, ckpt_path):
       saver: TensorFlow Saver object.
       sess: TensorFlow session.
       ckpt_path: path to checkpoint file with parameters.
-    ''' 
-    saver.restore(sess, ckpt_path)
-    print("Restored model parameters from {}".format(ckpt_path))
+    '''
+    print(ckpt_path)
+    print(" [*] Reading checkpoints...")
+
+    ckpt = tf.train.get_checkpoint_state(ckpt_path)
+    if ckpt and ckpt.model_checkpoint_path:
+        global_step = ckpt.model_checkpoint_path.split('/')[-1].split('-')[-1]
+        saver.restore(sess, ckpt.model_checkpoint_path)
+        print("successful loading,global step is %s" % global_step)
+    saver.restore(sess, ckpt.model_checkpoint_path)
+    print("Restored model parameters from {}".format(ckpt.model_checkpoint_path))
 
 def variable_summaries(var, name=None):
     """Attach a lot of summaries to a Tensor (for TensorBoard visualization)."""
@@ -168,6 +176,7 @@ def main():
 
     # Predictions.
     raw_output = net.layers['fc1_voc12']
+    print(raw_output)
     # Which variables to load. Running means and variances are not trainable,
     # thus all_variables() should be restored.
     restore_var = [v for v in tf.global_variables() if 'fc' not in v.name or not args.not_restore_last]
@@ -183,11 +192,11 @@ def main():
     # Predictions: ignoring all predictions with labels greater or equal than n_classes
     raw_prediction = tf.reshape(raw_output, [-1, args.num_classes])
     label_proc = prepare_label(label_batch, tf.stack(raw_output.get_shape()[1:3]), num_classes=args.num_classes, one_hot=False) # [batch_size, h, w]
+    print(label_proc)
     raw_gt = tf.reshape(label_proc, [-1,])
     indices = tf.squeeze(tf.where(tf.less_equal(raw_gt, args.num_classes - 1)), 1)
     gt = tf.cast(tf.gather(raw_gt, indices), tf.int32)
     prediction = tf.gather(raw_prediction, indices)
-                                                  
                                                   
     # Pixel-wise softmax loss.
     loss = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=prediction, labels=gt)
@@ -214,6 +223,7 @@ def main():
     # Variable summary
     variable_summaries(fc_w_trainable, 'fc_w')
     variable_summaries(fc_b_trainable, 'fc_b')
+    # variable_summaries(reduced_loss, 'reduced loss')
 
     total_summary = tf.summary.merge_all()
     summary_writer = tf.summary.FileWriter(args.snapshot_dir, graph=tf.get_default_graph())
